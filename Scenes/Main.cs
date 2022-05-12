@@ -32,9 +32,8 @@ public class Main : Node2D
 	public void _on_Edit_pressed()
 	{
 		_mainControl.Hide();
-		var scene = GD.Load("res://Scenes/Editor.tscn");
+		var scene = GD.Load<PackedScene>("res://Scenes/Editor.tscn");
 		var editor = scene.Instance<Editor>();
-		scene.Ins
 		AddChild(editor);
 		Update();	
 	}

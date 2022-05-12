@@ -42,7 +42,7 @@ public class Editor : Node2D
 	private int _currentTile = 1;
 	private int _currentEntity = 0;
 	private bool _testing = false;
-
+	private Game _testGame;
 	private Map _currentMap;
 	private int[,] _tileMap { get; set; } = new int[30, 30];
 	private int[,] _entityMap { get ;set;} = new int[30, 30];
@@ -59,11 +59,8 @@ public class Editor : Node2D
 
 	private bool hoveringUI;
 
-	public Editor(Map map = null)
-	{
-		_currentMap = map;
-	}
-
+	
+	
 	public override void _Ready()
 	{
 		_canvasLayer = GetNode<CanvasLayer>("CanvasLayer");
@@ -205,33 +202,45 @@ public class Editor : Node2D
 
 	public override void _Process(float delta)
 	{
-		if (Input.IsActionPressed("arrow_up"))
-		{
-			_camera.Position += new Vector2(0, -_cameraSpeed * delta);
+		if (_camera.Current) {
+			if (Input.IsActionPressed("arrow_up"))
+			{
+				_camera.Position += new Vector2(0, -_cameraSpeed * delta);
+			}
+			if (Input.IsActionPressed("arrow_down"))
+			{
+				_camera.Position += new Vector2(0, _cameraSpeed * delta);
+			}
+			if (Input.IsActionPressed("arrow_left"))
+			{
+				_camera.Position += new Vector2(-_cameraSpeed * delta, 0);
+			}
+			if (Input.IsActionPressed("arrow_right"))
+			{
+				_camera.Position += new Vector2(_cameraSpeed * delta, 0);
+			}
 		}
-		if (Input.IsActionPressed("arrow_down"))
-		{
-			_camera.Position += new Vector2(0, _cameraSpeed * delta);
-		}
-		if (Input.IsActionPressed("arrow_left"))
-		{
-			_camera.Position += new Vector2(-_cameraSpeed * delta, 0);
-		}
-		if (Input.IsActionPressed("arrow_right"))
-		{
-			_camera.Position += new Vector2(_cameraSpeed * delta, 0);
-		}
-		
 		if (Input.IsActionJustPressed("editor_save")) OnSave();
 		
 		if (Input.IsActionPressed("shift")) _cameraSpeed = 325; else _cameraSpeed = 200;
 
-		if (Input.IsActionJustPressed("ui_cancel"))
+		if (Input.IsActionJustPressed("escape"))
 		{
+			if (_testing)
+			{
+				_testing = false;
+				_camera.SetProcess(true);
+				_canvasLayer.SetProcess(true);
+				RemoveChild(_testGame);
+				_camera.Current = true;
+				_canvasLayer.GetChild<Control>(0).Show();
+				Update();
+			}
+			
 			_loadPanel.Visible = false;
 			_saveNewPanel.Visible = false;
 		}
-		
+
 		if (Input.IsActionJustPressed("mouse_left_down") && !hoveringUI)
 		{
 			var mousePos = GetGlobalMousePosition();
@@ -413,12 +422,24 @@ public class Editor : Node2D
 	private void OnTest()
 	{
 		Console.WriteLine("Testing");
-		Game game = new Game(_currentMap);
+		
+		/*
 		RemoveChild(_camera);
 		RemoveChild(_canvasLayer);
 		_camera.CallDeferred("free");
 		_canvasLayer.CallDeferred("free");
+		*/
+		_camera.SetProcess(false);
+		_canvasLayer.SetProcess(false);
+		_camera.Current = false;
+		_canvasLayer.GetChild<Control>(0).Hide();
+		_testGame = new Game(_currentMap);
+		AddChild(_testGame);
+		
+		var scene = GD.Load<PackedScene>("res://Scenes/Game.tscn");
+		var game = scene.Instance<Game>();
 		AddChild(game);
+		
 		_testing = true;
 		Update();
 	}
