@@ -11,6 +11,7 @@ using File = System.IO.File;
 public class Editor : Node2D
 {
 	private Control _control;
+	private CanvasLayer _canvasLayer;
 	private TabContainer _createMenu;
 	private GridContainer _tilesContainer;
 	private GridContainer _entitiesContainer;
@@ -40,6 +41,7 @@ public class Editor : Node2D
 	private Button _saveNewButton;
 	private int _currentTile = 1;
 	private int _currentEntity = 0;
+	private bool _testing = false;
 
 	private Map _currentMap;
 	private int[,] _tileMap { get; set; } = new int[30, 30];
@@ -57,8 +59,14 @@ public class Editor : Node2D
 
 	private bool hoveringUI;
 
+	public Editor(Map map = null)
+	{
+		_currentMap = map;
+	}
+
 	public override void _Ready()
 	{
+		_canvasLayer = GetNode<CanvasLayer>("CanvasLayer");
 		_control = GetNode<Control>("CanvasLayer/Control");
 		_createMenu = GetNode<TabContainer>("CanvasLayer/Control/CreateMenu");
 		_tilesContainer = GetNode<GridContainer>("CanvasLayer/Control/CreateMenu/Tiles");
@@ -270,71 +278,72 @@ public class Editor : Node2D
 
 	public override void _Draw()
 	{
-		
-		
-		for (int x = 0; x <= 29; x++)
+
+		if (!_testing)
 		{
-			for (int y = 0; y <= 29; y++)
+			for (int x = 0; x <= 29; x++)
 			{
-				var tile = _tileMap[x, y];
-				switch (tile)
+				for (int y = 0; y <= 29; y++)
 				{
-					case 0:
-						/*
-						DrawTextureRect(_tile_2, new Rect2(x * 48, y * 48, 48, 48), 
-							false,
-							null,
-							false,
-							null
-						);  */
-						break;
-					case 1:
-						DrawTextureRect(_tile_1, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 2:
-						DrawTextureRect(_tile_2, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 3:
-						DrawTextureRect(_tile_3, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 4:
-						DrawTextureRect(_tile_4, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 5:
-						DrawTextureRect(_tile_5, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 6:
-						DrawTextureRect(_tile_6, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 7:
-						DrawTextureRect(_tile_7, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 8:
-						DrawTextureRect(_tile_8, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
-					case 9:
-						DrawTextureRect(_tile_9, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
-						break;
+					var tile = _tileMap[x, y];
+					switch (tile)
+					{
+						case 0:
+							/*
+							DrawTextureRect(_tile_2, new Rect2(x * 48, y * 48, 48, 48), 
+								false,
+								null,
+								false,
+								null
+							);  */
+							break;
+						case 1:
+							DrawTextureRect(_tile_1, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 2:
+							DrawTextureRect(_tile_2, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 3:
+							DrawTextureRect(_tile_3, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 4:
+							DrawTextureRect(_tile_4, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 5:
+							DrawTextureRect(_tile_5, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 6:
+							DrawTextureRect(_tile_6, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 7:
+							DrawTextureRect(_tile_7, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 8:
+							DrawTextureRect(_tile_8, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+						case 9:
+							DrawTextureRect(_tile_9, new Rect2(x * 48, y * 48, 48, 48), false, null, false, null);
+							break;
+					}
 				}
 			}
-		}
-		
-		for (int i = 0; i <= 1440; i = i + 48)
-		{
-			DrawLine(
-				new Vector2(0, i), 
-				new Vector2(1440, i), 
-				new Color(255, 255, 255)
-			);
-			DrawLine(
-				new Vector2(i, 0), 
-				new Vector2(i, 1440), 
-				new Color(255, 255, 255)
-			);
+
+			for (int i = 0; i <= 1440; i = i + 48)
+			{
+				DrawLine(
+					new Vector2(0, i),
+					new Vector2(1440, i),
+					new Color(255, 255, 255)
+				);
+				DrawLine(
+					new Vector2(i, 0),
+					new Vector2(i, 1440),
+					new Color(255, 255, 255)
+				);
+			}
+
 		}
 
-		
-		
 		base._Draw();
 	}
 	
@@ -404,6 +413,14 @@ public class Editor : Node2D
 	private void OnTest()
 	{
 		Console.WriteLine("Testing");
+		Game game = new Game(_currentMap);
+		RemoveChild(_camera);
+		RemoveChild(_canvasLayer);
+		_camera.CallDeferred("free");
+		_canvasLayer.CallDeferred("free");
+		AddChild(game);
+		_testing = true;
+		Update();
 	}
 
 	private void OnExport()

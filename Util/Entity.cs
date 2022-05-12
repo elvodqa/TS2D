@@ -12,7 +12,7 @@ namespace TS2D.Util
         {
             
             Name = name;
-            ID = id;
+            //ID = id;
             this.position = position;
         }
     }
